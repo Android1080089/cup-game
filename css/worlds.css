@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Shell Quest - Worlds & Container Visual Themes
+   ========================================================================== */
+
+/* 1. Ocean Theme (0 - 19 Trophies) */
+.theme-ocean {
+  --world-accent: #00f5d4;
+  --world-glow: rgba(0, 245, 212, 0.4);
+  --world-bg-grad: radial-gradient(circle at 50% 30%, #0c1b33 0%, #050d1a 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(0, 245, 212, 0.35) 0%, transparent 70%);
+}
+
+/* 2. Desert Theme (20 - 39 Trophies) */
+.theme-desert {
+  --world-accent: #ffb703;
+  --world-glow: rgba(255, 183, 3, 0.4);
+  --world-bg-grad: radial-gradient(circle at 50% 30%, #2b112c 0%, #15081c 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(255, 183, 3, 0.35) 0%, transparent 70%);
+}
+
+/* 3. Sky Theme (40 - 59 Trophies) */
+.theme-sky {
+  --world-accent: #f72585;
+  --world-glow: rgba(247, 37, 133, 0.4);
+  --world-bg-grad: radial-gradient(circle at 50% 30%, #1e1338 0%, #0d061f 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(247, 37, 133, 0.35) 0%, transparent 70%);
+}
+
+/* 4. Jungle Theme (60 - 79 Trophies) */
+.theme-jungle {
+  --world-accent: #38b000;
+  --world-glow: rgba(56, 176, 0, 0.4);
+  --world-bg-grad: radial-gradient(circle at 50% 30%, #072216 0%, #03110a 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(56, 176, 0, 0.35) 0%, transparent 70%);
+}
+
+/* 5. Grand Victory Theme (80 - 100+ Trophies) */
+.theme-victory {
+  --world-accent: #ffd166;
+  --world-glow: rgba(255, 209, 102, 0.5);
+  --world-bg-grad: radial-gradient(circle at 50% 30%, #20063b 0%, #0a0117 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(255, 209, 102, 0.4) 0%, transparent 70%);
+}
+
+/* 6. Endless Tower Dark Theme */
+.theme-tower {
+  --world-accent: #a855f7;
+  --world-glow: rgba(168, 85, 247, 0.5);
+  --world-bg-grad: radial-gradient(circle at 50% 20%, #15062b 0%, #06010d 70%, #020005 100%);
+  --stage-glow-color: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.45) 0%, rgba(247, 37, 133, 0.2) 45%, transparent 75%);
+}
+
+/* Apply Dynamic World Background */
+.app-container {
+  background: var(--world-bg-grad, radial-gradient(circle at 50% 30%, #0c1b33 0%, #050d1a 100%));
+  transition: background 0.8s ease;
+}
+
+.stage-ambient-glow {
+  background: var(--stage-glow-color, radial-gradient(ellipse at center, rgba(0, 245, 212, 0.35) 0%, transparent 70%));
+}
+
+/* ==========================================================================
+   SVG Container Styles - Opaque and Solid
+   ========================================================================== */
+
+/* Ocean Shell SVG */
+.cup-svg.ocean-shell path.shell-base {
+  fill: url(#oceanShellGrad);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cup-svg.ocean-shell path.shell-lines {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* Desert Clay Pot */
+.cup-svg.desert-pot path.pot-base,
+.cup-svg.desert-pot ellipse.pot-base {
+  fill: url(#desertPotGrad);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cup-svg.desert-pot path.pot-ornament {
+  stroke: #ffd166;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+/* Sky Cloud Jar */
+.cup-svg.sky-jar path.jar-glass {
+  fill: url(#skyJarGrad);
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cup-svg.sky-jar path.jar-cork {
+  fill: #e0a96d;
+}
+
+/* Jungle Ancient Idol */
+.cup-svg.jungle-idol rect.idol-stone {
+  fill: url(#jungleIdolGrad);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cup-svg.jungle-idol path.idol-runes {
+  stroke: #70e000;
+  stroke-width: 2;
+  fill: none;
+  filter: drop-shadow(0 0 4px #70e000);
+}
+
+/* Victory Cosmic Relic */
+.cup-svg.victory-relic path.relic-gold,
+.cup-svg.victory-relic rect.relic-gold,
+.cup-svg.victory-relic ellipse.relic-gold {
+  fill: url(#victoryRelicGrad);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+}
+
+.cup-svg.victory-relic polygon.relic-gem {
+  fill: #00f5d4;
+  filter: drop-shadow(0 0 6px #00f5d4);
+}
+
+/* Rainbow Keys in Endless Tower */
+.cup-svg.rainbow-key {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8));
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cup-svg.rainbow-key path.key-shaft {
+  stroke-linecap: round;
+}
+
+.cup-svg.rainbow-key circle.key-gem {
+  animation: keyGemPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes keyGemPulse {
+  0% { filter: drop-shadow(0 0 4px #fff); }
+  100% { filter: drop-shadow(0 0 12px currentColor); }
+}
+
+.cup-slot.lifted .cup-svg.rainbow-key {
+  transform: rotate(-12deg) translateY(-8px);
+}
+
+/* ==========================================================================
+   Target Gem Themes (ONLY Active When Lifted or in X-Ray)
+   ========================================================================== */
+.cup-slot.lifted .target-item-inner,
+.cup-slot.xray .target-item-inner {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.theme-ocean .cup-slot.lifted .target-item-inner,
+.theme-ocean .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #a0f0ed 40%, #00f5d4 80%, #0077b6);
+  box-shadow: 0 0 20px #00f5d4;
+}
+
+.theme-desert .cup-slot.lifted .target-item-inner,
+.theme-desert .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #fffdf0, #ffd166 40%, #ffb703 80%, #d00000);
+  box-shadow: 0 0 20px #ffb703;
+}
+
+.theme-sky .cup-slot.lifted .target-item-inner,
+.theme-sky .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #ffb3c6 40%, #f72585 80%, #7209b7);
+  box-shadow: 0 0 20px #f72585;
+}
+
+.theme-jungle .cup-slot.lifted .target-item-inner,
+.theme-jungle .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #a7c957 40%, #38b000 80%, #004b23);
+  box-shadow: 0 0 20px #70e000;
+}
+
+.theme-victory .cup-slot.lifted .target-item-inner,
+.theme-victory .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #ffd166 35%, #00f5d4 70%, #9d4edd);
+  box-shadow: 0 0 25px #ffd166;
+}
+
+.theme-tower .cup-slot.lifted .target-item-inner,
+.theme-tower .cup-slot.xray .target-item-inner {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #f72585 30%, #7209b7 60%, #00f5d4 90%);
+  box-shadow: 0 0 25px #f72585, 0 0 45px rgba(0, 245, 212, 0.5);
+}
