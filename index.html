@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0d18">
+  <meta name="description" content="Shell Quest - A mobile-first, memory-based shell game with adaptive difficulty, mystical worlds, and power-up gambling.">
+  <title>Shell Quest - Lumina Shells Game</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Quicksand:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/worlds.css">
+</head>
+<body>
+  <!-- App Container (Mobile Frame) -->
+  <div class="app-container theme-ocean">
+    <!-- Ambient Canvas Particles & Confetti -->
+    <canvas id="particle-canvas"></canvas>
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Persistent HUD -->
+    <header class="top-app-bar" role="banner">
+      <div class="top-bar-left">
+        <div class="stat-pill streak" title="Current Win Streak">
+          <span class="icon">🔥</span>
+          <span class="stat-streak-val">0</span>
+        </div>
+      </div>
+
+      <div class="top-bar-center">
+        <div class="stat-pill trophy-badge" title="Trophy Progress to Next World">
+          <div class="trophy-info">
+            <span>🏆 Trophies</span>
+            <strong id="trophy-target-val">0/20</strong>
+          </div>
+          <div class="trophy-progress-bar">
+            <div id="trophy-progress-fill" class="trophy-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="stat-pill coins" title="Total Coins">
+          <span class="icon">🪙</span>
+          <span class="stat-coins-val">50</span>
+        </div>
+        <button id="btn-open-settings" class="icon-btn" aria-label="Settings" title="Game Settings">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast Alerts Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Main Content Panels Container -->
+    <main class="views-wrapper" role="main">
+
+      <!-- 1. Play Stage View -->
+      <section id="view-play" class="view-panel active" aria-labelledby="current-world-badge">
+        
+        <!-- Game Mode Switcher (World Journey vs Endless Dark Tower) -->
+        <div class="game-mode-toggle-bar" role="group" aria-label="Game Mode Switcher">
+          <button class="mode-toggle-btn active" data-mode="journey" title="Conquer 5 worlds and 100 trophies">🗺️ World Journey</button>
+          <button class="mode-toggle-btn" data-mode="tower" title="Ascend infinite floors with Rainbow Keys & no speed limit!">🗼 Endless Tower</button>
+        </div>
+
+        <div class="play-header">
+          <div class="world-banner">
+            <span id="current-world-badge" class="world-badge">Ocean Realm</span>
+          </div>
+          <span id="difficulty-badge" class="difficulty-badge">EASY • Lv. 1</span>
+        </div>
+
+        <!-- Mode Selection Segmented Control (Easy, Normal, Hard) -->
+        <div class="difficulty-selector-bar" role="group" aria-label="Difficulty Mode Selection">
+          <button class="diff-btn active" data-diff="easy" title="Easy: Relaxed shuffle & barely any obstacles">🌱 Easy</button>
+          <button class="diff-btn" data-diff="normal" title="Normal: Balanced speed, +15 Coins & moderate obstacles">⚡ Normal</button>
+          <button class="diff-btn" data-diff="hard" title="Hard: Blistering speed, +25 Coins, +2 Trophies & intense obstacles">🔥 Hard</button>
+        </div>
+
+        <!-- Central Game Arena -->
+        <div class="game-stage-container">
+          <div class="stage-ambient-glow"></div>
+          <div class="stage-platform"></div>
+
+          <!-- Dynamic Cups Arena -->
+          <div id="cups-arena" class="cups-arena" role="region" aria-label="Shell Game Board">
+            <!-- Cups will be generated dynamically by game.js -->
+          </div>
+
+          <!-- Hard Mode Themed Visual Hazard Canvas (Sandstorm, Fish, Asteroids) -->
+          <canvas id="hazard-canvas"></canvas>
+        </div>
+
+        <!-- Stage Status Prompt -->
+        <div class="stage-status-bar">
+          <h1 id="stage-status-title" class="stage-status-title">Ready for Challenge</h1>
+          <p id="stage-status-subtitle" class="stage-status-subtitle">Track the hidden Luminous Pearl!</p>
+        </div>
+
+        <!-- Passive Abilities Quick HUD Bar (6 Unique Abilities) -->
+        <div class="passives-hud-bar" role="region" aria-label="Passive Abilities Cooldown Status">
+          <div id="passive-card-xray" class="passive-hud-card locked" title="X-Ray Vision Passive: Reveals the hidden gem">
+            <div class="passive-top-row">
+              <span class="passive-icon">👁️</span>
+              <span class="passive-name">X-Ray</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+
+          <div id="passive-card-doublePick" class="passive-hud-card locked" title="Double Pick Passive: 2 guesses per round">
+            <div class="passive-top-row">
+              <span class="passive-icon">✌️</span>
+              <span class="passive-name">Double Pick</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+
+          <div id="passive-card-timeSlow" class="passive-hud-card locked" title="Time Slow Passive: Slows shuffle speed by 50%">
+            <div class="passive-top-row">
+              <span class="passive-icon">⏳</span>
+              <span class="passive-name">Time Slow</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+
+          <div id="passive-card-oracle" class="passive-hud-card locked" title="Oracle Vision Passive: Eliminates 1 fake container">
+            <div class="passive-top-row">
+              <span class="passive-icon">🔮</span>
+              <span class="passive-name">Oracle</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+
+          <div id="passive-card-shield" class="passive-hud-card locked" title="Aegis Shield Passive: Protects streak & trophies on miss">
+            <div class="passive-top-row">
+              <span class="passive-icon">🛡️</span>
+              <span class="passive-name">Aegis Shield</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+
+          <div id="passive-card-midas" class="passive-hud-card locked" title="Midas Surge Passive: 3x Coin Rewards on win">
+            <div class="passive-top-row">
+              <span class="passive-icon">💰</span>
+              <span class="passive-name">Midas Surge</span>
+              <span class="passive-level-badge">LOCKED</span>
+            </div>
+            <div class="passive-status-pill">🔒 Roll to Unlock</div>
+            <div class="passive-mini-progress">
+              <div class="passive-mini-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Action Button -->
+        <div class="game-controls-area">
+          <button id="btn-main-action" class="btn-primary">
+            Start Round
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Lucky Roll / Gacha Store View -->
+      <section id="view-shop" class="view-panel" aria-labelledby="shop-heading">
+        <div class="shop-header-compact">
+          <div class="shop-hero-text">
+            <h2 id="shop-heading" class="shop-title">The Lucky Roll</h2>
+            <p class="shop-subtitle">Roll to unlock & reduce passive cooldowns!</p>
+          </div>
+          <div class="gacha-vault-compact">
+            <div id="gacha-orb" class="gacha-orb">🎲</div>
+            <div class="gacha-price-badge">
+              <span class="gacha-price-label">Price:</span>
+              <strong class="gacha-price-val">🪙 100</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passive Abilities Codex (Compact Buff Cards) -->
+        <div class="passives-codex-showcase">
+          <div id="shop-item-xray" class="showcase-item">
+            <div class="showcase-icon">👁️</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">X-Ray Vision</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">See through containers to spot the target gem.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-item-doublePick" class="showcase-item">
+            <div class="showcase-icon">✌️</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">Double Pick</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">Choose 2 cups in a single round for 2x odds.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-item-timeSlow" class="showcase-item">
+            <div class="showcase-icon">⏳</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">Time Slow</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">Reduces cup shuffling speed by 50%.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-item-oracle" class="showcase-item">
+            <div class="showcase-icon">🔮</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">Oracle Vision</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">Eliminates 1 empty fake container after shuffling.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-item-shield" class="showcase-item">
+            <div class="showcase-icon">🛡️</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">Aegis Shield</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">Protects against streak and trophy loss on miss.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="shop-item-midas" class="showcase-item">
+            <div class="showcase-icon">💰</div>
+            <div class="showcase-details">
+              <div class="showcase-top-meta">
+                <span class="showcase-name">Midas Surge</span>
+                <span class="showcase-level-tag">Locked (Lv. 0)</span>
+              </div>
+              <div class="showcase-desc">Triples coin rewards (3x Coins) on a winning round.</div>
+              <div class="showcase-cooldown-bar">
+                <span class="showcase-cooldown-tag">Unlock: 10 turns</span>
+                <div class="showcase-level-track"><div class="showcase-level-fill"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prominent Bottom Action Area for Roll Button -->
+        <div class="shop-action-container">
+          <button id="btn-gacha-roll" class="btn-primary btn-gacha-roll">
+            🎲 Roll Lucky Gacha (100 Coins)
+          </button>
+        </div>
+      </section>
+
+      <!-- 3. World Map View -->
+      <section id="view-map" class="view-panel" aria-labelledby="map-heading">
+        <div class="map-header">
+          <h2 id="map-heading" class="map-title">World Progression</h2>
+          <p class="map-subtitle">Earn trophies to unlock mystical realms and exotic containers.</p>
+        </div>
+
+        <div class="worlds-track">
+          <!-- 1. Ocean -->
+          <div class="world-card unlocked" data-world-id="ocean">
+            <div class="world-node-icon">🐚</div>
+            <div class="world-info">
+              <div class="world-name">Ocean Realm</div>
+              <div class="world-container-type">Container: Shimmering Shells</div>
+              <div class="world-requirement">Unlocked (0 Trophies)</div>
+            </div>
+          </div>
+
+          <!-- 2. Desert -->
+          <div class="world-card" data-world-id="desert">
+            <div class="world-node-icon">🏺</div>
+            <div class="world-info">
+              <div class="world-name">Desert Dunes</div>
+              <div class="world-container-type">Container: Clay Pots</div>
+              <div class="world-requirement">20 Trophies Required</div>
+            </div>
+          </div>
+
+          <!-- 3. Sky -->
+          <div class="world-card" data-world-id="sky">
+            <div class="world-node-icon">✨</div>
+            <div class="world-info">
+              <div class="world-name">Sky Islands</div>
+              <div class="world-container-type">Container: Cloud Jars</div>
+              <div class="world-requirement">40 Trophies Required</div>
+            </div>
+          </div>
+
+          <!-- 4. Jungle -->
+          <div class="world-card" data-world-id="jungle">
+            <div class="world-node-icon">🗿</div>
+            <div class="world-info">
+              <div class="world-name">Jungle Ruins</div>
+              <div class="world-container-type">Container: Stone Idols (4 Cups)</div>
+              <div class="world-requirement">60 Trophies Required</div>
+            </div>
+          </div>
+
+          <!-- 5. Grand Victory -->
+          <div class="world-card" data-world-id="victory">
+            <div class="world-node-icon">👑</div>
+            <div class="world-info">
+              <div class="world-name">Grand Victory (Cosmic)</div>
+              <div class="world-container-type">Container: Cosmic Relics</div>
+              <div class="world-requirement">80 - 100 Trophies Milestone</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Stats & Daily Quest View -->
+      <section id="view-stats" class="view-panel" aria-labelledby="stats-heading">
+        <div class="shop-hero">
+          <h2 id="stats-heading" class="shop-title">Player Statistics</h2>
+          <p class="shop-subtitle">Track your mastery and claim daily rewards.</p>
+        </div>
+
+        <!-- Daily Chest -->
+        <div class="daily-quest-card">
+          <div class="daily-chest-icon">🎁</div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px;">Daily Treasure Chest</h3>
+          <p id="daily-timer-label" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">Available Now!</p>
+          <button id="btn-claim-daily" class="btn-primary">
+            Claim 50 Coins Free!
+          </button>
+          <button id="btn-instant-daily" class="btn-secondary" style="margin-top: 8px; font-size: 0.75rem; padding: 6px 10px;">
+            ⚡ Reset Chest Cooldown (Demo Test)
+          </button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div id="stat-total-games" class="stat-card-value">0</div>
+            <div class="stat-card-label">Games Played</div>
+          </div>
+
+          <div class="stat-card">
+            <div id="stat-total-wins" class="stat-card-value">0</div>
+            <div class="stat-card-label">Total Wins</div>
+          </div>
+
+          <div class="stat-card">
+            <div id="stat-win-rate" class="stat-card-value">0%</div>
+            <div class="stat-card-label">Win Rate</div>
+          </div>
+
+          <div class="stat-card">
+            <div id="stat-max-streak" class="stat-card-value">0</div>
+            <div class="stat-card-label">Best Streak</div>
+          </div>
+
+          <div class="stat-card" style="border-color: rgba(168, 85, 247, 0.4);">
+            <div id="stat-tower-floor" class="stat-card-value" style="color: #a855f7;">1</div>
+            <div class="stat-card-label">Best Tower Floor</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav-bar" role="navigation" aria-label="Main Navigation">
+      <button class="nav-tab active" data-target="play" aria-label="Play Tab">
+        <span class="nav-icon">🎮</span>
+        <span class="nav-label">Play</span>
+      </button>
+
+      <button class="nav-tab" data-target="shop" aria-label="Store Tab">
+        <span class="nav-icon">🎰</span>
+        <span class="nav-label">Lucky Roll</span>
+      </button>
+
+      <button class="nav-tab" data-target="map" aria-label="Map Tab">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-label">World Map</span>
+      </button>
+
+      <button class="nav-tab" data-target="stats" aria-label="Stats Tab">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Stats</span>
+      </button>
+    </nav>
+
+    <!-- ==========================================================================
+         Modals
+         ========================================================================== -->
+
+    <!-- Tower Game Over Modal -->
+    <div id="modal-tower-over" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tower-modal-title">
+      <div class="modal-card">
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close">✕</button>
+        <div class="modal-icon" style="font-size: 2.5rem;">🗼</div>
+        <h2 id="tower-modal-title" class="modal-title" style="background: linear-gradient(135deg, #a855f7, #f72585); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tower Run Ended</h2>
+        <p class="modal-body" id="tower-modal-body">
+          You conquered up to <strong id="tower-cleared-text">Floor 1</strong> before the Rainbow Keys slipped away!
+        </p>
+        <div class="tower-stats-box" style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 14px; border-radius: 12px; margin: 14px 0; border: 1px solid rgba(168,85,247,0.35);">
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase;">Floor Reached</div>
+            <div id="tower-reached-val" style="font-family: var(--font-numbers); font-size: 1.4rem; font-weight: 800; color: #a855f7;">1</div>
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase;">All-Time Best</div>
+            <div id="tower-best-val" style="font-family: var(--font-numbers); font-size: 1.4rem; font-weight: 800; color: #ffd166;">1</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <button id="btn-tower-retry" class="btn-primary" style="flex: 1; padding: 12px;">🚀 Ascend Again</button>
+          <button id="btn-tower-exit" class="btn-secondary modal-close-trigger" style="flex: 1; padding: 12px;">🗺️ Journey</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gacha Prize Modal -->
+    <div id="modal-prize" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="prize-title">
+      <div class="modal-card">
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close">✕</button>
+        <div id="prize-icon" class="modal-icon">💎</div>
+        <h2 id="prize-title" class="modal-title">Gacha Reward!</h2>
+        <p id="prize-desc" class="modal-body">You obtained a power-up!</p>
+        <button class="btn-primary modal-close-trigger">Awesome!</button>
+      </div>
+    </div>
+
+    <!-- World Unlock Celebration Modal -->
+    <div id="modal-world-unlock" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="unlock-world-title">
+      <div class="modal-card">
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close">✕</button>
+        <div id="unlock-world-icon" class="modal-icon">🏺</div>
+        <h2 id="unlock-world-title" class="modal-title">New World Unlocked!</h2>
+        <p id="unlock-world-desc" class="modal-body">You've unlocked a new stage with exotic containers and faster shuffles!</p>
+        <button class="btn-primary modal-close-trigger">Enter World</button>
+      </div>
+    </div>
+
+    <!-- Grand Victory 100 Trophies Modal -->
+    <div id="modal-grand-victory" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="grand-victory-title">
+      <div class="modal-card">
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close">✕</button>
+        <div class="modal-icon">👑</div>
+        <h2 id="grand-victory-title" class="modal-title">GRAND VICTORY!</h2>
+        <p class="modal-body">
+          Incredible achievement! You have conquered all 100 trophies across the mystical worlds and mastered the Cosmic Relics! You are the Supreme Shell Quest Champion!
+        </p>
+        <button class="btn-primary modal-close-trigger">Claim Supreme Glory</button>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="modal-card">
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close">✕</button>
+        <div class="modal-icon" style="font-size: 2.2rem;">⚙️</div>
+        <h2 id="settings-modal-title" class="modal-title">Game Settings</h2>
+
+        <div class="settings-group">
+          <div class="settings-row">
+            <span>Sound Effects (SFX)</span>
+            <label class="switch">
+              <input type="checkbox" id="setting-sfx-toggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <span>Ambient Music Synth</span>
+            <label class="switch">
+              <input type="checkbox" id="setting-music-toggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button id="btn-cheat-passives" class="btn-secondary" style="font-size: 0.8rem; padding: 8px;">
+            ⚡ Level Up Passives (+1 Lv All Passives for Testing)
+          </button>
+          <button id="btn-cheat-ready-passives" class="btn-secondary" style="font-size: 0.8rem; padding: 8px;">
+            ⚡ Make All Passives Ready for Next Round
+          </button>
+          <button id="btn-cheat-trophies" class="btn-secondary" style="font-size: 0.8rem; padding: 8px;">
+            ⚡ Fast Forward (+20 Trophies & +200 Coins for Testing)
+          </button>
+          <button id="btn-reset-data" class="btn-secondary" style="color: #ff70a6; border-color: rgba(247, 37, 133, 0.4); font-size: 0.8rem; padding: 8px;">
+            Reset All Game Progress
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/hazards.js"></script>
+  <script src="js/economy.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
